@@ -23,11 +23,11 @@ const Header = () => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser !== null) {
         setCurrentUser(firebaseUser);
-        setIsLoggedIn(true)
+        setIsLoggedIn(true);
         console.log("user from useEffect: ", firebaseUser);
       } else {
         setCurrentUser(null);
-        setIsLoggedIn(false)
+        setIsLoggedIn(false);
         console.log("user logged out from useEffect");
       }
     });
@@ -37,14 +37,16 @@ const Header = () => {
   }, []);
 
   return isLoggedIn ? (
-    <div className="absolute top-0 left-0 w-screen flex h-20 justify-end">
-      <button
-        className="py-2.5 px-5 mr-4 text-sm font-medium focus:outline-none rounded-lg  focus:z-10 focus:ring-1 focus:ring-accent ring-inset bg-primary text-slate-800  hover:text-light hover:bg-primary_accent hover:scale-105 w-40 self-center"
-        onClick={handleLogout}
-      >
-        logout {currentUser?.displayName} &nbsp;
-        <FontAwesomeIcon icon={faArrowRightFromBracket} />
-      </button>
+    <div id="header-wrapper">
+      <div id="header" className="w-screen flex h-20 justify-end">
+        <button
+          className="py-2.5 px-5 mr-4 text-sm font-medium focus:outline-none rounded-lg  focus:z-10 focus:ring-1 focus:ring-accent ring-inset bg-primary text-slate-800  hover:text-light hover:bg-primary_accent hover:scale-105 w-40 self-center"
+          onClick={handleLogout}
+        >
+          logout {currentUser?.displayName} &nbsp;
+          <FontAwesomeIcon icon={faArrowRightFromBracket} />
+        </button>
+      </div>
     </div>
   ) : (
     <></>
