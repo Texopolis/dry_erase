@@ -24,11 +24,9 @@ const Header = () => {
       if (firebaseUser !== null) {
         setCurrentUser(firebaseUser);
         setIsLoggedIn(true);
-        console.log("user from useEffect: ", firebaseUser);
       } else {
         setCurrentUser(null);
         setIsLoggedIn(false);
-        console.log("user logged out from useEffect");
       }
     });
     return () => {
