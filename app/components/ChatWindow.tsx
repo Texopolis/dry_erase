@@ -1,7 +1,6 @@
 "use client";
-import React, { SetStateAction, useEffect, useState } from "react";
+import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { db } from "../firebase/firebase";
-// import { ref, push, set, onValue, onChildAdded } from "firebase/database";
 import {
   collection,
   addDoc,
@@ -10,6 +9,9 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { auth } from "../firebase/firebase";
+import UserChatBubble from "../components/UserChatBubble";
+import FriendChatBubble from "./FriendChatBubble";
+import uuid from "react-uuid";
 
 const ChatWindow = () => {
   const [isTyping, setIsTyping] = useState(false);
@@ -44,26 +46,29 @@ const ChatWindow = () => {
           ...doc.data(),
         };
       });
-        // console.log("message", message)
-        // console.log("message sorted", message.sort((a,b)=>a.timestamp-b.timestamp))
-
-      setConversation(message.sort((a,b)=>b.timestamp-a.timestamp));
+      setConversation(message.sort((a, b) => b.timestamp - a.timestamp));
     });
     return () => {
       unsub;
     };
   }, []);
 
-  console.log("first,", conversation);
+  const refArr = useRef(new Array());
+
+  useEffect(() => {
+    refArr.current[0] &&
+      refArr.current[0].scrollIntoView({ behavior: "smooth" });
+  }, [conversation, refArr]);
 
   const createMessage = async (userId: string, message: string) => {
     try {
       const messageRef = await addDoc(collection(db, "messages"), {
         sender: userId,
-        message: currentMessage,
+        message: message,
         timestamp: Date.now(),
+        messageId: uuid(),
+        displayName: auth.currentUser?.displayName,
       });
-      console.log("Document written with ID: ", messageRef.id);
     } catch (error) {
       console.error(error);
     }
@@ -72,25 +77,54 @@ const ChatWindow = () => {
   return (
     <div
       id="chat-window-wrapper"
-      className="h-full w-full flex justify-center items-end"
+      className="h-full w-full flex justify-center items-center py-6"
     >
       <div
         id="chat-window"
-        className="bg-primary_accent h-4/5 w-4/5 mb-4 rounded-lg backdrop-blur-sm drop-shadow-lg z-10 border-dark flex flex-col-reverse"
+        className="bg-light h-full w-10/12 mb-1 rounded-lg backdrop-blur-sm drop-shadow-2xl shadow-dark z-10  flex flex-col relative"
       >
-        <form onSubmit={handleSubmit} className="flex w-full">
-          <input
-            className="rounded-xl m-4 p-4 w-full"
-            placeholder="say something nice"
-            onChange={handleChange}
-            value={currentMessage}
-          ></input>
-          <button type="submit">submit</button>
-        </form>
-        <div>figure this out</div>
-        {conversation?.map((item:Message, id:string) => {
-          return <span key={id}>{item.message}</span>;
-        })}
+        <div className="overflow-auto flex-grow px-4 pb-1 flex flex-col-reverse">
+          {conversation?.map((item: Message) => {
+            if (item.sender === auth.currentUser?.uid) {
+              return (
+                <UserChatBubble
+                  senderId={item.sender}
+                  message={item.message}
+                  timestamp={item.timestamp}
+                  key={item.messageId}
+                  displayName={item.displayName}
+                  ref={(ref) => refArr.current.push(ref)}
+                />
+              );
+            } else
+              return (
+                <FriendChatBubble
+                  senderId={item.sender}
+                  message={item.message}
+                  timestamp={item.timestamp}
+                  key={item.messageId}
+                  displayName={item.displayName}
+                  ref={(ref) => refArr.current.push(ref)}
+                />
+              );
+          })}
+        </div>
+        <div className="w-auto flex justify-center items-center p-4">
+          <form
+            onSubmit={handleSubmit}
+            className=" flex items-center justify-center w-11/12 border-primary_accent border-2 rounded-xl"
+          >
+            <input
+              className=" p-4 flex-grow rounded-xl bg-transparent text-center text-lg caret-accent"
+              placeholder="say something nice"
+              onChange={handleChange}
+              value={currentMessage}
+            ></input>
+            <button type="submit" className="p-4 bg-transparent hidden">
+              submit
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
