@@ -11,11 +11,11 @@ export default async function Layout({ children }: Props) {
       <header className="absolute">
         <Header />
       </header>
-      <div className="flex h-full">
+      <div className="flex h-full w-screen">
         <aside className="basis-72 bg-accent hidden md:inline">
           <FriendsList friends={["sal", "george", "ed"]} />
         </aside>
-        <main className="grow mt-20 flex content-center items-center">
+        <main className="grow mt-20 flex content-center items-center w-full">
           <ChatWindow />
         </main>
       </div>

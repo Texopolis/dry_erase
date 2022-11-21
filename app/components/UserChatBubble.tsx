@@ -1,18 +1,19 @@
 import React, { forwardRef } from "react";
-import { Delius } from "@next/font/google";
+import { Gloria_Hallelujah } from "@next/font/google";
 
 type Props = {
   senderId: string;
   message: string;
   timestamp: string;
   displayName: string;
+  textColor: string;
 };
 
-const deluis = Delius({ weight: "400" });
+const gloriaHallelujah = Gloria_Hallelujah({ weight: "400" });
 
 const UserChatBubble = forwardRef(
   (
-    { message, timestamp, displayName }: Props,
+    { message, timestamp, displayName, textColor }: Props,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -27,7 +28,7 @@ const UserChatBubble = forwardRef(
         <div className="self-center text-xs text-grey">{displayName}</div>
         <div>
           <p
-            className={`py-2 px-4 rounded-2xl ${deluis.className} break-all w-fit shadow-md mb-1 text-xl text-dark`}
+            className={`py-2 px-4 rounded-xl ${gloriaHallelujah.className} break-all w-fit shadow-md mb-1 text-2xl ${textColor}`}
           >
             {message}
           </p>

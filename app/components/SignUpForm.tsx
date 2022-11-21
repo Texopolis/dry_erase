@@ -1,11 +1,17 @@
 "use client";
 import React, { useState, SetStateAction } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth, db } from "../firebase/firebase";
+import { Permanent_Marker } from "@next/font/google";
 import { useRouter } from "next/navigation";
+import { doc, setDoc } from "firebase/firestore";
+
+
+const permanent = Permanent_Marker({ weight: "400" });
 
 const SignUpForm = () => {
   const router = useRouter();
+
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -13,6 +19,7 @@ const SignUpForm = () => {
   const [passwordCheck, setPasswordCheck] = useState("");
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [colorClass, setColorClass] = useState("");
 
   const handleName = (e: { target: { value: SetStateAction<string> } }) => {
     setName(e.target.value);
@@ -30,6 +37,20 @@ const SignUpForm = () => {
     target: { value: SetStateAction<string> };
   }) => {
     setPasswordCheck(e.target.value);
+  };
+
+  const createUser = async () => {
+    try {
+      if (auth.currentUser === null) return;
+      const uid = auth.currentUser.uid;
+      await setDoc(doc(db, "users", uid), {
+        user: auth.currentUser?.uid,
+        color: colorClass,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -65,6 +86,12 @@ const SignUpForm = () => {
       setTimeout(() => {
         setError(false);
       }, 3000);
+    } else if (colorClass === "") {
+      setErrorMessage("Please choose a color");
+      setError(true);
+      setTimeout(() => {
+        setError(false);
+      }, 3000);
     } else {
       try {
         const userCredentials = await createUserWithEmailAndPassword(
@@ -74,6 +101,7 @@ const SignUpForm = () => {
         );
         const user = userCredentials.user;
         await updateProfile(user, { displayName: name });
+        await createUser();
         router.push("/dashboard");
       } catch (error) {
         console.log(error);
@@ -101,8 +129,7 @@ const SignUpForm = () => {
     );
   };
 
-  const inputClass =
-    "px-3 py-2 mb-4 placeholder-dark text-dark relative bg-light rounded text-sm border-0 shadow outline-none focus:outline-dark  w-full text-center";
+  const inputClass = `px-3 py-2 mb-4 placeholder-grey ${colorClass} relative bg-light rounded-xl border-0 shadow outline-none w-full text-center font-bold text-3xl ${permanent.className} tracking-wide placeholder:text-sm placeholder:text-italic placeholder:font-sans focus:ring`;
 
   const labelClass =
     "block text-sm font-medium text-primary_accent self-start mb-1";
@@ -110,7 +137,6 @@ const SignUpForm = () => {
   return (
     <div className="flex flex-col justify-center items-center w-80">
       <div className="h-4 mb-4 sticky">{message()}</div>
-
       <form className="flex flex-col w-80">
         <label
           htmlFor="name"
@@ -161,10 +187,50 @@ const SignUpForm = () => {
           value={passwordCheck}
           type="password"
         />
-
+        <div className="flex flex-col items-center w-full">
+          <h2 className="mt-4">Choose your marker color</h2>
+          <div className="flex gap-3 w-full h-10 justify-evenly mt-4 mb-6">
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-red ${
+                colorClass === "text-red" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-red")}
+            />
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-blue ${
+                colorClass === "text-blue" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-blue")}
+            />
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-green ${
+                colorClass === "text-green" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-green")}
+            />
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-purple ${
+                colorClass === "text-purple" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-purple")}
+            />
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-yellow ${
+                colorClass === "text-yellow" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-yellow")}
+            />
+            <div
+              className={`rounded-full w-10 hover:cursor-pointer hover:scale-110 bg-orange ${
+                colorClass === "text-orange" ? "border-4 border-primary" : ""
+              }`}
+              onClick={() => setColorClass("text-orange")}
+            />
+          </div>
+        </div>
         <button
           onClick={handleSubmit}
-          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium focus:outline-none rounded-lg  focus:z-10 focus:ring-1 focus:ring-accent ring-inset bg-primary text-slate-800  hover:text-light hover:bg-primary_accent hover:scale-105 w-40 self-center"
+          className="py-2.5 px-5 mr-2 mb-2 text-sm font-medium focus:outline-none rounded-lg  focus:ring-1 ring-inset bg-primary text-slate-800  hover:text-light hover:bg-primary_accent hover:scale-105 w-40 self-center"
           type="submit"
         >
           Submit
