@@ -19,8 +19,6 @@ function Page() {
     </h1>
   );
 
-  const loginForm = <div>login</div>;
-
   return (
     <div id="landing-wrapper" className="w-full h-full">
       <div className="flex justify-center items-center gap-4 ">

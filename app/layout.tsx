@@ -12,6 +12,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={lato.className}>
       <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body className="flex flex-col justify-center h-screen relative ">

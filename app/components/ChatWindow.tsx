@@ -4,19 +4,36 @@ import { db } from "../firebase/firebase";
 import {
   collection,
   addDoc,
-  getDocs,
+  getDoc,
   doc,
   onSnapshot,
+  DocumentData,
 } from "firebase/firestore";
 import { auth } from "../firebase/firebase";
 import UserChatBubble from "../components/UserChatBubble";
 import FriendChatBubble from "./FriendChatBubble";
 import uuid from "react-uuid";
+import { onAuthStateChanged } from "firebase/auth";
 
 const ChatWindow = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [currentMessage, setCurrentMessage] = useState("");
   const [conversation, setConversation] = useState<Message>();
+  const [user, setUser] = useState<DocumentData>({ color: "text-dark" });
+
+  onAuthStateChanged(auth, async (firebaseUser) => {
+    if (firebaseUser) {
+      const uid = firebaseUser.uid;
+      const docRef = doc(db, "users", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const user = docSnap.data();
+        setUser(user);
+      } else {
+        setUser({ color: "text-dark" });
+      }
+    }
+  });
 
   type Message = {
     [x: string]: any;
@@ -24,6 +41,21 @@ const ChatWindow = () => {
 
   const handleChange = (e: { target: { value: SetStateAction<string> } }) => {
     setCurrentMessage(e.target.value);
+  };
+
+  const createMessage = async (userId: string, message: string) => {
+    try {
+      const messageRef = await addDoc(collection(db, "messages"), {
+        sender: userId,
+        message: message,
+        timestamp: Date.now(),
+        messageId: uuid(),
+        displayName: auth.currentUser?.displayName,
+        textColor: user.color,
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -60,20 +92,6 @@ const ChatWindow = () => {
       refArr.current[0].scrollIntoView({ behavior: "smooth" });
   }, [conversation, refArr]);
 
-  const createMessage = async (userId: string, message: string) => {
-    try {
-      const messageRef = await addDoc(collection(db, "messages"), {
-        sender: userId,
-        message: message,
-        timestamp: Date.now(),
-        messageId: uuid(),
-        displayName: auth.currentUser?.displayName,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <div
       id="chat-window-wrapper"
@@ -93,10 +111,11 @@ const ChatWindow = () => {
                   timestamp={item.timestamp}
                   key={item.messageId}
                   displayName={item.displayName}
+                  textColor={item.textColor}
                   ref={(ref) => refArr.current.push(ref)}
                 />
               );
-            } else
+            } else {
               return (
                 <FriendChatBubble
                   senderId={item.sender}
@@ -104,9 +123,11 @@ const ChatWindow = () => {
                   timestamp={item.timestamp}
                   key={item.messageId}
                   displayName={item.displayName}
+                  textColor={item.textColor}
                   ref={(ref) => refArr.current.push(ref)}
                 />
               );
+            }
           })}
         </div>
         <div className="w-auto flex justify-center items-center p-4">
