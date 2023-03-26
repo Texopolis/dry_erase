@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "../components/Header";
-import FriendsList from "../components/FriendsList";
+// import FriendsList from "../components/FriendsList";
 import ChatWindow from "../components/ChatWindow";
 
 type Props = { children: React.ReactNode };
@@ -12,9 +12,9 @@ export default async function Layout({ children }: Props) {
         <Header />
       </header>
       <div className="flex h-full w-screen">
-        <aside className="basis-72 bg-accent hidden md:inline">
+        {/* <aside className="basis-72 bg-accent hidden md:inline">
           <FriendsList friends={["sal", "george", "ed"]} />
-        </aside>
+        </aside> */}
         <main className="grow mt-20 flex content-center items-center w-full">
           <ChatWindow />
         </main>
